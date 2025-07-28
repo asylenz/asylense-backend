@@ -26,4 +26,4 @@ RUN poetry install --extras cpu
 
 EXPOSE 9000
 
-ENTRYPOINT ["whisper-asr-webservice"]
+ENTRYPOINT ["uvicorn", "app.webservice:app", "--host", "0.0.0.0", "--port", "9000"]
