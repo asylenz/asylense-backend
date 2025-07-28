@@ -110,18 +110,31 @@ def load_audio(file: BinaryIO, encode=True, sr: int = CONFIG.SAMPLE_RATE):
     -------
     A NumPy array containing the audio waveform, in float32 dtype.
     """
+    print(f"DEBUG load_audio: encode={encode}, sr={sr}")
+    
     if encode:
         try:
+            # Read file content first for debugging
+            file_content = file.read()
+            print(f"DEBUG load_audio: Input file size: {len(file_content)} bytes")
+            
             # This launches a subprocess to decode audio while down-mixing and resampling as necessary.
             # Requires the ffmpeg CLI and `ffmpeg-python` package to be installed.
-            out, _ = (
+            out, err = (
                 ffmpeg.input("pipe:", threads=0)
                 .output("-", format="s16le", acodec="pcm_s16le", ac=1, ar=sr)
-                .run(cmd="ffmpeg", capture_stdout=True, capture_stderr=True, input=file.read())
+                .run(cmd="ffmpeg", capture_stdout=True, capture_stderr=True, input=file_content)
             )
+            print(f"DEBUG load_audio: FFmpeg output size: {len(out)} bytes")
+            if err:
+                print(f"DEBUG load_audio: FFmpeg stderr: {err.decode()}")
         except ffmpeg.Error as e:
+            print(f"DEBUG load_audio: FFmpeg error: {e.stderr.decode()}")
             raise RuntimeError(f"Failed to load audio: {e.stderr.decode()}") from e
     else:
         out = file.read()
+        print(f"DEBUG load_audio: Direct read size: {len(out)} bytes")
 
-    return np.frombuffer(out, np.int16).flatten().astype(np.float32) / 32768.0
+    result = np.frombuffer(out, np.int16).flatten().astype(np.float32) / 32768.0
+    print(f"DEBUG load_audio: Final audio array shape: {result.shape}")
+    return result

@@ -42,8 +42,12 @@ class OpenAIWhisperASR(ASRModel):
         # Debug: Audio-Informationen ausgeben
         print(f"DEBUG: Audio shape: {audio.shape}")
         print(f"DEBUG: Audio duration: {len(audio) / CONFIG.SAMPLE_RATE:.2f} seconds")
-        print(f"DEBUG: Audio min/max: {audio.min():.4f}/{audio.max():.4f}")
-        print(f"DEBUG: Audio RMS: {(audio**2).mean()**0.5:.4f}")
+        if len(audio) > 0:
+            print(f"DEBUG: Audio min/max: {audio.min():.4f}/{audio.max():.4f}")
+            print(f"DEBUG: Audio RMS: {(audio**2).mean()**0.5:.4f}")
+        else:
+            print("DEBUG: Audio is empty!")
+            print("DEBUG: This indicates a problem with audio loading/processing")
 
         options_dict = {"task": task}
         if language:
