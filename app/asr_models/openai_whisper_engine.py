@@ -39,6 +39,12 @@ class OpenAIWhisperASR(ASRModel):
             if self.model is None:
                 self.load_model()
 
+        # Debug: Audio-Informationen ausgeben
+        print(f"DEBUG: Audio shape: {audio.shape}")
+        print(f"DEBUG: Audio duration: {len(audio) / CONFIG.SAMPLE_RATE:.2f} seconds")
+        print(f"DEBUG: Audio min/max: {audio.min():.4f}/{audio.max():.4f}")
+        print(f"DEBUG: Audio RMS: {(audio**2).mean()**0.5:.4f}")
+
         options_dict = {"task": task}
         if language:
             options_dict["language"] = language
@@ -46,8 +52,18 @@ class OpenAIWhisperASR(ASRModel):
             options_dict["initial_prompt"] = initial_prompt
         if word_timestamps:
             options_dict["word_timestamps"] = word_timestamps
+        
+        print(f"DEBUG: Transcription options: {options_dict}")
+        
         with self.model_lock:
             result = self.model.transcribe(audio, **options_dict)
+
+        # Debug: Ergebnis-Informationen ausgeben
+        print(f"DEBUG: Transcription result keys: {result.keys()}")
+        print(f"DEBUG: Detected language: {result.get('language', 'unknown')}")
+        print(f"DEBUG: Number of segments: {len(result.get('segments', []))}")
+        print(f"DEBUG: Text length: {len(result.get('text', ''))}")
+        print(f"DEBUG: Text content: '{result.get('text', '')}'")
 
         output_file = StringIO()
         self.write_result(result, output_file, output)
