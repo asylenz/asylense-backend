@@ -7,6 +7,7 @@ from urllib.parse import quote
 import click
 import uvicorn
 from fastapi import FastAPI, File, Query, UploadFile, applications
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.docs import get_swagger_ui_html
 from fastapi.responses import RedirectResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
@@ -29,6 +30,26 @@ app = FastAPI(
     contact={"url": projectMetadata["Home-page"]},
     swagger_ui_parameters={"defaultModelsExpandDepth": -1},
     license_info={"name": "MIT License", "url": "https://github.com/ahmetoner/whisper-asr-webservice/blob/main/LICENCE"},
+)
+
+# CORS-Middleware hinzufügen, um localhost-Anfragen zu erlauben
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost",
+        "http://localhost:3000",
+        "http://localhost:8000",
+        "http://localhost:8080",
+        "http://localhost:9000",
+        "http://127.0.0.1",
+        "http://127.0.0.1:3000",
+        "http://127.0.0.1:8000",
+        "http://127.0.0.1:8080",
+        "http://127.0.0.1:9000",
+    ],
+    allow_credentials=True,
+    allow_methods=["GET", "POST"],
+    allow_headers=["*"],
 )
 
 assets_path = os.getcwd() + "/swagger-ui-assets"

@@ -122,7 +122,8 @@ def load_audio(file: BinaryIO, encode=True, sr: int = CONFIG.SAMPLE_RATE):
             # Requires the ffmpeg CLI and `ffmpeg-python` package to be installed.
             out, err = (
                 ffmpeg.input("pipe:", threads=0)
-                .output("-", format="s16le", acodec="pcm_s16le", ac=1, ar=sr)
+                .output("-", format="s16le", acodec="pcm_s16le", ac=1, ar=sr, 
+                       **{"fflags": "+genpts", "avoid_negative_ts": "make_zero"})
                 .run(cmd="ffmpeg", capture_stdout=True, capture_stderr=True, input=file_content)
             )
             print(f"DEBUG load_audio: FFmpeg output size: {len(out)} bytes")
